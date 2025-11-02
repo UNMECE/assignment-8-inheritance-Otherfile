@@ -1,39 +1,38 @@
 #include<iostream>
 #include<cmath>
 
-class Electric_Field {
+#define PI 3.14159265358979
+#define E0 8.8541878188e-12
+#define MU0 4*PI*(pow(10, -7))
 
-	private:
-		double *E;
+class Field {
+
+	protected:
+		double *value;
 
 	public:
 
-		// constructor
-		Electric_Field(){E = new double[3];
-			E[0]=0;
-			E[1]=0;
-			E[2]=0;}
+		
+		Field(){value = new double[3];
+			value[0]=0;
+			value[1]=0;
+			value[2]=0;}
 
+		Field(double vx, double vy, double vz) {value = new double[3];
+        	value[0] = vx;
+        	value[1] = vy;
+        	value[2] = vz;
+    }
+		~Field(){delete[] value;}
+		
 
+		double getV_X(){return value[0];}
+		double getV_Y(){return value[1];}
+		double getV_Z(){return value[2];}
 
-		Electric_Field(double ex, double ey, double ez){E=new double[3];
-			E[0]=ex;
-			E[1]=ey;
-			E[2]=ez;}
-
-		~Electric_Field(){std::cout<< "Cleared Electric Field"  << std::endl, delete[] E;}
-
-
-		// deconstructor
-
-		// setter
-		double getE_X(){return E[0];}
-		double getE_Y(){return E[1];}
-		double getE_Z(){return E[2];}
-		// getter
-		void setE_X(double ex){ex = E[0];}
-		void setE_Y(double ey){ey = E[1];}
-		void setE_Z(double ez){ez = E[2];}
+		void setV_X(double vx){value[0] = vx;}
+		void setV_Y(double vy){value[1] = vy;}
+		void setV_Z(double vz){value[2] = vz;}
 
 		double magnitude(){
 
@@ -41,83 +40,76 @@ class Electric_Field {
 
 			for (int i = 0; i < 3; i++){
 
-				total += pow(E[i], 2);
+				total += pow(value[i], 2);
 			}
 
 			return sqrt(total);
 
 		}
 
-		double inner_product(){
-			double total = 0;
-			for (int i = 0; i < 3; i++){
+		void printMagnitude(){
 
-				total += pow(E[i],2);
+			std::cout << "Magnitude: " << this->magnitude() << std::endl;
+		}
+		
+};
 
-			}
+class Electric_Field : public Field {
 
-			return total;
+	
+	private:
+		double E;
+	
+		
+	public:
+	
+		Electric_Field() : Field(){}
+		Electric_Field(double ex, double ey, double ez) : Field(ex, ey, ez){}
+
+		void Find_E_Field(double charge, double distance){
+
+			E = charge/(4*PI*pow(distance, 2)*E0);
 
 		}
 
+		
+
+		double E_Field(){
+			return E;
+		}
+		
+	std::ostream& operator<<(std::ostream& os, const Electric_Field& ef) {
+    
+    // Now we can access ef.value because we are a 'friend'
+    	os << "E-Field Components: (" 
+       	<< ef.value[0] << ", " 
+       	<< ef.value[1] << ", " 
+       	<< ef.value[2] << ")";
+    
+    // Return the stream object
+    	return os;
+}
 };
 
 
-class Magnetic_Field {
+class Magnetic_Field : public Field{
 
 	private:
-		double *M;
+		double B;
+	
+		public:
 
-	public:
-		Magnetic_Field(){M = new double[3];
-			M[0]=0;
-			M[1]=0;
-			M[2]=0;}
-
-		Magnetic_Field(double mx, double my, double mz){M=new double[3];
-			M[0] = mx;
-			M[1] = my;
-			M[2] = mz;}
-
-		~Magnetic_Field(){std::cout<< "Cleared Magnetic_Field" << std::endl, delete[] M;}
-
-		double getM_X(){return M[0];}
-		double getM_Y(){return M[1];}
-		double getM_Z(){return M[2];}
-		// getter
-		void setM_X(double mx){mx = M[0];}
-		void setM_Y(double my){my = M[1];}
-		void setM_Z(double mz){mz = M[2];}
-
-		double magnitude_M(){
-
-			double total = 0;
-
-			for (int i = 0; i < 3; i++){
-
-				total += pow(M[i], 2);
-			}
-
-			return sqrt(total);
-
+		Magnetic_Field() : Field(){}
+		Magnetic_Field(double mx, double my, double mz) : Field(mx, my, mz){}
+		void Find_B_Field(double current, double distance){
+			B = (current*MU0)/(2*PI*distance);
 		}
 
-		void unit_vector(){
 
-			double magnitude = magnitude_M();
-			double unit_x, unit_y, unit_z;
-			for (int i = 0; i < 3; i++){
-
-				unit_x = M[i]/magnitude;
-				unit_y = M[i]/magnitude;
-				unit_z = M[i]/magnitude;
-
-				std::cout << "Unit Vector: " << unit_x << " " << unit_y << " " << unit_z << std::endl;
-
-			}
-
+		double B_Field(){
+			return B;
 		}
-
+		
 };
 
 
@@ -125,27 +117,22 @@ class Magnetic_Field {
 int main(){
 
 	double magnitude;
-	// type output
+	
 	Electric_Field E_default;
 	Electric_Field E_components(1e5, 10.9, 1.7e2);
+	E_components.Find_E_Field(10, 0.25);
+	
 	Magnetic_Field M_default;
 	Magnetic_Field M_components(1e5, 10.9, 1.7e2);
+	M_components.Find_B_Field(10, 0.25);
 
-	magnitude = E_default.magnitude();
-	std::cout << "Magnitude of Default Electric Field: " << magnitude << std::endl;
-	E_default.inner_product();
+	std::cout << E_components << std::endl;
+	E_components.printMagnitude();
+	std::cout << "Electric Field " << E_components.E_Field() << std::endl;
 
-	magnitude = E_components.magnitude();
-	std::cout << "Magnitude of Electric Field: " << magnitude << std::endl;
-	E_components.inner_product();
-
-	magnitude = M_default.magnitude_M();
-	std::cout << "Magnitude of Default Magnetic Field: " << magnitude << std::endl;
-	M_default.unit_vector();
-
-	magnitude = M_components.magnitude_M();
-	std::cout << "Magnitude of Magnetic Field: " << magnitude << std::endl;
-	M_components.unit_vector();
+	M_components.printComponents();
+	M_components.printMagnitude();
+	std::cout << "Magnetic Field " << M_components.B_Field() << std::endl;
 
 	return 0;
 
