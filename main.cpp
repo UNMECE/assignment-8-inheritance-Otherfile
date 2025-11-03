@@ -78,19 +78,7 @@ class Electric_Field : public Field {
 			return E;
 		}
 		
-	std::ostream& operator<<(std::ostream& os, const Electric_Field& ef) {
-    
-    // Now we can access ef.value because we are a 'friend'
-    	os << "E-Field Components: (" 
-       	<< ef.value[0] << ", " 
-       	<< ef.value[1] << ", " 
-       	<< ef.value[2] << ")";
-    
-    // Return the stream object
-    	return os;
-}
 };
-
 
 class Magnetic_Field : public Field{
 
